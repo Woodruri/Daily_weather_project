@@ -1,71 +1,138 @@
 import requests
-import csv
-import datetime as dt
+import json
+import pprint
+import datetime
+import urllib
 
-'''station is bgm (avoca area)'''
-base_url = 'https://www.ncei.noaa.gov/access/services/data/v1?'
-start_date= dt.date.fromisoformat("2024-03-01")
-end_date = dt.date.fromisoformat("2024-03-31")
 
 s = requests.Session()
 
+url = "https://data.rcc-acis.org/StnData"
 headers = {
-    'Token' : 'uRaFEaZsYIOyjgUqrtVWpjybZhFLZpIt'
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0',
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Origin': 'https://nowdata.rcc-acis.org',
+    'Connection': 'keep-alive',
+    'Referer': 'https://nowdata.rcc-acis.org/',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-site',
+    'TE': 'trailers'
 }
-params = {
-    'datasetid': 'daily_summaries',
-    'stationid': 'GHCND:USW00004725',  # Replace with your station ID
-    'startdate': start_date,
-    'enddate': end_date,
-    'datatypeid': ['TMAX', 'TMIN', 'PRCP'],  # Adjust based on needed data types
-    'units': 'standard',
-    'limit': 1000,
-}
 
-def get_date_ISO():
-    '''
-    This requires no input, but will prompt a use for an ISO date format
-    Output: date object in ISO 8601 date format
-    '''
-    input_date = input("Input date in ISO format (YYYY-MM-DD): ")
-    return dt.date.fromisoformat(input_date)
+def get_snow(start_date="1901-04-01", end_date="2024-04-01"):
+    data = {
+        'params': json.dumps({
+            "elems": [
+                {
+                    "name": "snow",
+                    "interval": [1, 0, 0],
+                    "smry": [
+                        {"reduce": "max", "add": "date"},
+                        {"reduce": "min", "add": "date"}
+                    ],
+                    "smry_only": 1
+                },
+                {
+                    "name": "snow",
+                    "duration": "mtd",
+                    "reduce": "sum",
+                    "interval": [1, 0, 0],
+                    "smry": [
+                        {"reduce": "max", "add": "date"},
+                        {"reduce": "min", "add": "date"}
+                    ],
+                    "smry_only": 1
+                },
+                {
+                    "name": "snow",
+                    "duration": "std",
+                    "reduce": "sum",
+                    "season_start": "07-01",
+                    "interval": [1, 0, 0],
+                    "smry": [
+                        {"reduce": "max", "add": "date"},
+                        {"reduce": "min", "add": "date"}
+                    ],
+                    "smry_only": 1
+                }
+            ],
+            "sid": "AVPthr 9",
+            "meta": [],
+            "sDate": start_date,
+            "eDate": end_date
+        }),
+        'output': 'json'
+    }
 
-def query_date(ISO_date):
-    '''
-    This will take in one ISO date format and use the other information provided to query the API
-    input: 
-    date object with ISO date
-    output:
-    probably a custom object with all the fields, im deciding atm
-    '''
+    resp = s.post(url, headers=headers, data=data)
+    if resp.status_code != 200:
+        print("error occured while getting snow data")
+        return
 
-def build_url(dataset='daily_summaries', stationId='USW00004725', startDate='2024-03-01', endDate='2024-03-31', dataTypes=''):
-    '''
-    this function will take all of our variables used in seperate locations
-    to make our url with all of the proper arguments
-    input:
-    dataset (string): a string that contains the name of the dataset we'll be querying on the website
-    stationId (string): a string that has the station ID of the station we'll be querying
+    weather_data = json.loads(resp.text)
+    record_high = weather_data['smry'][0][0][0]
+    record_low = weather_data['smry'][0][1][0]
 
-    output:
-    string: a string that is the full url with all arguments filled out
-    '''
-    dataset_string = f'dataset={dataset}'
-    station_string = f'stations={stationId}'
-    start_string = f'startDate={startDate}'
-    end_string = f'endDate={endDate}'
-    data_types_string = f'dataTypes={dataTypes}'
+    print(f'record high = {record_high}\nrecord low = {record_low}')
 
-    url = f'{base_url}{dataset_string}&{station_string}&{start_string}&{end_string}&{data_types_string}'
-    return url
+def get_max_temp(start_date="1901-04-01", end_date="2024-04-01"):
+    data = {
+        'params': json.dumps({
+            "elems": [
+                {
+                    "name": "snow",
+                    "interval": [1, 0, 0],
+                    "smry": [
+                        {"reduce": "max", "add": "date"},
+                        {"reduce": "min", "add": "date"}
+                    ],
+                    "smry_only": 1
+                },
+                {
+                    "name": "snow",
+                    "duration": "mtd",
+                    "reduce": "sum",
+                    "interval": [1, 0, 0],
+                    "smry": [
+                        {"reduce": "max", "add": "date"},
+                        {"reduce": "min", "add": "date"}
+                    ],
+                    "smry_only": 1
+                },
+                {
+                    "name": "snow",
+                    "duration": "std",
+                    "reduce": "sum",
+                    "season_start": "07-01",
+                    "interval": [1, 0, 0],
+                    "smry": [
+                        {"reduce": "max", "add": "date"},
+                        {"reduce": "min", "add": "date"}
+                    ],
+                    "smry_only": 1
+                }
+            ],
+            "sid": "AVPthr 9",
+            "meta": [],
+            "sDate": start_date,
+            "eDate": end_date
+        }),
+        'output': 'json'
+    }
 
+    resp = s.post(url, headers=headers, data=data)
+    if resp.status_code != 200:
+        print("error occured while getting snow data")
+        return
 
+    weather_data = json.loads(resp.text)
+    record_high = weather_data['smry'][0][0][0]
+    record_low = weather_data['smry'][0][1][0]
 
+    print(f'record high = {record_high}\nrecord low = {record_low}')
 
-def main():
-    url = build_url()    
-    resp = s.get(url, headers=headers)
-    print(resp.text)
-
-if __name__ == '__main__':
-    main()
+get_snow()
