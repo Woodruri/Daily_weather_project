@@ -2,7 +2,6 @@ import requests
 import json
 import pprint
 import datetime
-import urllib
 
 
 s = requests.Session()
@@ -23,10 +22,43 @@ headers = {
     'TE': 'trailers'
 }
 
-def get_snow(start_date="1901-04-01", end_date="2024-04-01"):
+def get_daily_info(given_date="2024-04-01"):
     data = {
         'params': json.dumps({
             "elems": [
+                {"name": "maxt"}, {"name": "mint"}, {"name": "avgt"}, {"name": "pcpn"},
+                {"name": "snow"}
+            ],
+            "sid": "AVPthr 9",
+            "date": given_date,
+            "meta": ["name", "state", "sids"]
+        }),
+        'output': 'json'
+    }
+
+    resp = s.post(url, headers=headers, data=data)
+    if resp.status_code != 200:
+        print("error occured while getting daily data")
+        return 
+
+    weather_data = json.loads(resp.text)
+    #pprint.pprint(weather_data)
+    daily_data = {
+        "date" : weather_data['data'][0][0],
+        "maxt" : weather_data['data'][0][1],
+        "mint" : weather_data['data'][0][2],
+        "avgt" : weather_data['data'][0][3],
+        "precip" : weather_data['data'][0][4],
+        "snow" : weather_data['data'][0][5]
+    }
+    return daily_data
+
+
+def get_record_info(start_date="1901-04-01", end_date="2024-04-01"):
+    data = {
+        'params': json.dumps({
+            "elems": [
+                #record snowfall
                 {
                     "name": "snow",
                     "interval": [1, 0, 0],
@@ -36,10 +68,9 @@ def get_snow(start_date="1901-04-01", end_date="2024-04-01"):
                     ],
                     "smry_only": 1
                 },
+                #max temperature
                 {
-                    "name": "snow",
-                    "duration": "mtd",
-                    "reduce": "sum",
+                    "name": "maxt",
                     "interval": [1, 0, 0],
                     "smry": [
                         {"reduce": "max", "add": "date"},
@@ -47,17 +78,24 @@ def get_snow(start_date="1901-04-01", end_date="2024-04-01"):
                     ],
                     "smry_only": 1
                 },
+                #min temp
                 {
-                    "name": "snow",
-                    "duration": "std",
-                    "reduce": "sum",
-                    "season_start": "07-01",
+                    "name": "mint",
                     "interval": [1, 0, 0],
                     "smry": [
                         {"reduce": "max", "add": "date"},
                         {"reduce": "min", "add": "date"}
                     ],
                     "smry_only": 1
+                },
+                #max/min precipitation
+                {
+                    "name":"pcpn"
+                    ,"interval":[1,0,0],
+                    "smry": [
+                        {"reduce":"max","add":"date"},
+                        {"reduce":"min","add":"date"}],
+                        "smry_only":1
                 }
             ],
             "sid": "AVPthr 9",
@@ -70,69 +108,58 @@ def get_snow(start_date="1901-04-01", end_date="2024-04-01"):
 
     resp = s.post(url, headers=headers, data=data)
     if resp.status_code != 200:
-        print("error occured while getting snow data")
-        return
+        print("error occured while getting historic data")
+        return 
 
     weather_data = json.loads(resp.text)
-    record_high = weather_data['smry'][0][0][0]
-    record_low = weather_data['smry'][0][1][0]
+    #pprint.pprint(weather_data)
+    
+    record_info = {
+        "record_high_snow" : weather_data['smry'][0][0][0],
+        "record_low_snow" : weather_data['smry'][0][1][0],
+        "record_high_high_temp" : weather_data['smry'][1][0][0],
+        "record_low_high_temp" : weather_data['smry'][1][1][0],
+        "record_high_low_temp" : weather_data['smry'][2][0][0],
+        "record_low_low_temp" : weather_data['smry'][2][1][0],
+        "record_high_precip" : weather_data['smry'][3][0][0],
+        "record_low_precip" : weather_data['smry'][3][1][0]
+    }
 
-    print(f'record high = {record_high}\nrecord low = {record_low}')
+    return record_info
 
-def get_max_temp(start_date="1901-04-01", end_date="2024-04-01"):
+def get_normal_info(given_date="2024-04-01"):
     data = {
         'params': json.dumps({
             "elems": [
-                {
-                    "name": "snow",
-                    "interval": [1, 0, 0],
-                    "smry": [
-                        {"reduce": "max", "add": "date"},
-                        {"reduce": "min", "add": "date"}
-                    ],
-                    "smry_only": 1
-                },
-                {
-                    "name": "snow",
-                    "duration": "mtd",
-                    "reduce": "sum",
-                    "interval": [1, 0, 0],
-                    "smry": [
-                        {"reduce": "max", "add": "date"},
-                        {"reduce": "min", "add": "date"}
-                    ],
-                    "smry_only": 1
-                },
-                {
-                    "name": "snow",
-                    "duration": "std",
-                    "reduce": "sum",
-                    "season_start": "07-01",
-                    "interval": [1, 0, 0],
-                    "smry": [
-                        {"reduce": "max", "add": "date"},
-                        {"reduce": "min", "add": "date"}
-                    ],
-                    "smry_only": 1
-                }
+                {"name": "maxt", "duration": "dly", "normal": "91", "prec": 1},
+                {"name": "mint", "duration": "dly", "normal": "91", "prec": 1},
+                {"name": "avgt", "duration": "dly", "normal": "91"},
+                {"name": "pcpn", "duration": "dly", "normal": "91"},
+                {"name": "snow", "duration": "dly", "normal": "91"},
             ],
             "sid": "AVPthr 9",
             "meta": [],
-            "sDate": start_date,
-            "eDate": end_date
+            "date": given_date
         }),
         'output': 'json'
     }
-
     resp = s.post(url, headers=headers, data=data)
     if resp.status_code != 200:
-        print("error occured while getting snow data")
-        return
+        print("error occured while getting historic data")
+        return 
 
     weather_data = json.loads(resp.text)
-    record_high = weather_data['smry'][0][0][0]
-    record_low = weather_data['smry'][0][1][0]
+    #pprint.pprint(weather_data)
+    normal_info = {
+        "maxt" : weather_data['data'][0][0],
+        "mint" : weather_data['data'][0][1],
+        "avgt" : weather_data['data'][0][2],
+        "precip" : weather_data['data'][0][3],
+        "snow" : weather_data['data'][0][4]
+    }
+    return normal_info
 
-    print(f'record high = {record_high}\nrecord low = {record_low}')
-
-get_snow()
+def get_info():
+    get_daily_info()
+    get_normal_info()
+    get_record_info()
