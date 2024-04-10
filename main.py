@@ -1,7 +1,7 @@
 import requests
 import json
 import pprint
-import datetime
+from datetime import datetime, timedelta
 
 
 s = requests.Session()
@@ -58,16 +58,6 @@ def get_record_info(start_date="1901-04-01", end_date="2024-04-01", sid="AVPthr 
     data = {
         'params': json.dumps({
             "elems": [
-                #record snowfall
-                {
-                    "name": "snow",
-                    "interval": [1, 0, 0],
-                    "smry": [
-                        {"reduce": "max", "add": "date"},
-                        {"reduce": "min", "add": "date"}
-                    ],
-                    "smry_only": 1
-                },
                 #max temperature
                 {
                     "name": "maxt",
@@ -96,7 +86,17 @@ def get_record_info(start_date="1901-04-01", end_date="2024-04-01", sid="AVPthr 
                         {"reduce":"max","add":"date"},
                         {"reduce":"min","add":"date"}],
                         "smry_only":1
-                }
+                },
+                #record snowfall
+                {
+                    "name": "snow",
+                    "interval": [1, 0, 0],
+                    "smry": [
+                        {"reduce": "max", "add": "date"},
+                        {"reduce": "min", "add": "date"}
+                    ],
+                    "smry_only": 1
+                },
             ],
             "sid": sid,
             "meta": [],
@@ -115,14 +115,14 @@ def get_record_info(start_date="1901-04-01", end_date="2024-04-01", sid="AVPthr 
     #pprint.pprint(weather_data)
     
     record_info = {
-        "record_high_snow" : weather_data['smry'][0][0][0],
-        "record_low_snow" : weather_data['smry'][0][1][0],
-        "record_high_high_temp" : weather_data['smry'][1][0][0],
-        "record_low_high_temp" : weather_data['smry'][1][1][0],
-        "record_high_low_temp" : weather_data['smry'][2][0][0],
-        "record_low_low_temp" : weather_data['smry'][2][1][0],
-        "record_high_precip" : weather_data['smry'][3][0][0],
-        "record_low_precip" : weather_data['smry'][3][1][0]
+        "high_maxt" : weather_data['smry'][0][0][0],
+        "low_maxt" : weather_data['smry'][0][1][0],
+        "high_mint" : weather_data['smry'][1][0][0],
+        "low_mint" : weather_data['smry'][1][1][0],
+        "high_precip" : weather_data['smry'][2][0][0],
+        "low_precip" : weather_data['smry'][2][1][0],
+        "high_snow" : weather_data['smry'][3][0][0],
+        "low_snow" : weather_data['smry'][3][1][0],
     }
 
     return record_info
@@ -172,5 +172,48 @@ def get_info(given_date="2024-04-01", sid="AVPthr 9"):
     print(f'daily = {daily_info}\n\n'
           f'normal = {normal_info}\n\n'
           f'record = {record_info}\n\n')
+    
+    full_info = {
+        'date' : daily_info['date'],
+        'daily_maxt' : daily_info['maxt'],
+        'daily_mint' : daily_info['mint'],
+        'daily_avgt' : daily_info['avgt'],
+        'daily_precip' : daily_info['precip'],
+        'daily_snow' : daily_info['snow'],
+        #normal info
+        'normal_maxt' : normal_info['maxt'],
+        'normal_mint' : normal_info['mint'],
+        'normal_avgt' : normal_info['avgt'],
+        'normal_precip' : normal_info['precip'],
+        'normal_snow' : normal_info['snow'],
+        #record info
+        'record_high_maxt' : record_info['high_maxt'],
+        'record_low_maxt' : record_info['low_maxt'],
+        'record_high_mint' : record_info['high_mint'],
+        'record_low_mint' : record_info['high_mint'],
+        'record_high_precip' : record_info['high_precip'],
+        'record_low_precip' : record_info['low_precip'],
+        'record_high_snow' : record_info['high_snow'],
+        'record_low_snow' : record_info['low_snow'],
+    }
 
-get_info()
+    print(full_info)
+
+def get_info_range(start_date = "2024-0a3-01", end_date="2024-03-31", sid="AVPthr 9"):
+    
+
+    try:
+        current_date = datetime.strptime(start_date, '%Y-%m-%d')
+        final_date = datetime.strptime(end_date, '%Y-%m-%d')
+    except TypeError:
+        print("Inproper date input")
+    except:
+        print("you did something wrong and im not sure what")
+    
+
+    while current_date <= final_date:
+        print(current_date)
+        current_date += timedelta(days=1)    
+
+
+get_info_range()
