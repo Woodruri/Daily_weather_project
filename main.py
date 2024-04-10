@@ -159,10 +159,15 @@ def get_normal_info(given_date="2024-04-01", sid="AVPthr 9"):
     }
     return normal_info
 
-def get_info():
-    daily_info = get_daily_info()
-    normal_info = get_normal_info()
-    record_info = get_record_info()
+def get_info(given_date="2024-04-01", sid="AVPthr 9"):
+
+    #add something here to ensure valid date format
+
+    start_date = f'1901-{given_date[-5:]}'
+    #print(start_date)
+    daily_info = get_daily_info(given_date, sid)
+    normal_info = get_normal_info(given_date, sid)
+    record_info = get_record_info(start_date, given_date, sid)
 
     print(f'daily = {daily_info}\n\n'
           f'normal = {normal_info}\n\n'
