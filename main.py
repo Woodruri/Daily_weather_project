@@ -22,14 +22,14 @@ headers = {
     'TE': 'trailers'
 }
 
-def get_daily_info(given_date="2024-04-01"):
+def get_daily_info(given_date="2024-04-01", sid="AVPthr 9"):
     data = {
         'params': json.dumps({
             "elems": [
                 {"name": "maxt"}, {"name": "mint"}, {"name": "avgt"}, {"name": "pcpn"},
                 {"name": "snow"}
             ],
-            "sid": "AVPthr 9",
+            "sid": sid,
             "date": given_date,
             "meta": ["name", "state", "sids"]
         }),
@@ -54,7 +54,7 @@ def get_daily_info(given_date="2024-04-01"):
     return daily_data
 
 
-def get_record_info(start_date="1901-04-01", end_date="2024-04-01"):
+def get_record_info(start_date="1901-04-01", end_date="2024-04-01", sid="AVPthr 9"):
     data = {
         'params': json.dumps({
             "elems": [
@@ -98,7 +98,7 @@ def get_record_info(start_date="1901-04-01", end_date="2024-04-01"):
                         "smry_only":1
                 }
             ],
-            "sid": "AVPthr 9",
+            "sid": sid,
             "meta": [],
             "sDate": start_date,
             "eDate": end_date
@@ -127,7 +127,7 @@ def get_record_info(start_date="1901-04-01", end_date="2024-04-01"):
 
     return record_info
 
-def get_normal_info(given_date="2024-04-01"):
+def get_normal_info(given_date="2024-04-01", sid="AVPthr 9"):
     data = {
         'params': json.dumps({
             "elems": [
@@ -137,7 +137,7 @@ def get_normal_info(given_date="2024-04-01"):
                 {"name": "pcpn", "duration": "dly", "normal": "91"},
                 {"name": "snow", "duration": "dly", "normal": "91"},
             ],
-            "sid": "AVPthr 9",
+            "sid": sid,
             "meta": [],
             "date": given_date
         }),
@@ -160,6 +160,12 @@ def get_normal_info(given_date="2024-04-01"):
     return normal_info
 
 def get_info():
-    get_daily_info()
-    get_normal_info()
-    get_record_info()
+    daily_info = get_daily_info()
+    normal_info = get_normal_info()
+    record_info = get_record_info()
+
+    print(f'daily = {daily_info}\n\n'
+          f'normal = {normal_info}\n\n'
+          f'record = {record_info}\n\n')
+
+get_info()
