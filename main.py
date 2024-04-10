@@ -53,7 +53,6 @@ def get_daily_info(given_date="2024-04-01", sid="AVPthr 9"):
     }
     return daily_data
 
-
 def get_record_info(start_date="1901-04-01", end_date="2024-04-01", sid="AVPthr 9"):
     data = {
         'params': json.dumps({
@@ -199,21 +198,27 @@ def get_info(given_date="2024-04-01", sid="AVPthr 9"):
 
     print(full_info)
 
-def get_info_range(start_date = "2024-0a3-01", end_date="2024-03-31", sid="AVPthr 9"):
+def get_info_range(start_date = "2024-03-01", end_date="2024-04-31", sid="AVPthr 9"):
     
 
     try:
         current_date = datetime.strptime(start_date, '%Y-%m-%d')
         final_date = datetime.strptime(end_date, '%Y-%m-%d')
-    except TypeError:
-        print("Inproper date input")
-    except:
-        print("you did something wrong and im not sure what")
-    
+    except TypeError as e:
+        print("Invalid date format or type. \nError: ", e)
+        return
+    except ValueError as e:
+        print("Improper date input, likely out of range. \nError: ", e)
+        return
+    except Exception as e:
+        print("you did something wrong and im not sure what. \nError: ", e)
+        return
 
     while current_date <= final_date:
         print(current_date)
-        current_date += timedelta(days=1)    
+        current_date += timedelta(days=1)
+
+
 
 
 get_info_range()
