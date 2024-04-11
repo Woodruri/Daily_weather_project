@@ -163,14 +163,13 @@ def get_info(given_date="2024-04-01", sid="AVPthr 9"):
     #add something here to ensure valid date format
 
     start_date = f'1901-{given_date[-5:]}'
-    #print(start_date)
     daily_info = get_daily_info(given_date, sid)
     normal_info = get_normal_info(given_date, sid)
     record_info = get_record_info(start_date, given_date, sid)
 
-    print(f'daily = {daily_info}\n\n'
+    """print(f'daily = {daily_info}\n\n'
           f'normal = {normal_info}\n\n'
-          f'record = {record_info}\n\n')
+          f'record = {record_info}\n\n')"""
     
     full_info = {
         'date' : daily_info['date'],
@@ -196,9 +195,9 @@ def get_info(given_date="2024-04-01", sid="AVPthr 9"):
         'record_low_snow' : record_info['low_snow'],
     }
 
-    print(full_info)
+    return full_info
 
-def get_info_range(start_date = "2024-03-01", end_date="2024-04-31", sid="AVPthr 9"):
+def get_info_range(start_date = "2024-03-01", end_date="2024-03-07", sid="AVPthr 9"):
     
 
     try:
@@ -215,10 +214,10 @@ def get_info_range(start_date = "2024-03-01", end_date="2024-04-31", sid="AVPthr
         return
 
     while current_date <= final_date:
-        print(current_date)
+        curr_data = get_info(current_date.strftime('%Y-%m-%d'))
+        print(curr_data)
         current_date += timedelta(days=1)
 
 
 
-
-get_info_range()
+get_info_range("2024-04-01", "2024-04-08")
