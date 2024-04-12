@@ -1,6 +1,9 @@
 import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import json
 import pprint
+from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
 
@@ -21,6 +24,63 @@ headers = {
     'Sec-Fetch-Site': 'same-site',
     'TE': 'trailers'
 }
+
+'''
+I don't wnat to get rid of this, but it's got too much stuff I need to do to make it happen xd
+def get_sid():
+    options = Options()
+    options.headless = True
+    driver = webdriver.Firefox(options=options)
+    climate_url = "https://www.weather.gov/wrh/Climate"
+
+    resp = s.get(climate_url)
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    map_stuff = soup.find('map', {'name' : 'cwa'})
+    locations = map_stuff.find_all('area')
+
+    for area in locations:
+        name = area['name']
+        url = area['href']
+        print(name)
+        print(url)
+        print()
+    
+    selection = input("Enter the 3 character string at the end of the URL to show the areas and their sids: ")
+    area_url = f"https://www.weather.gov/wrh/Climate?wfo={selection}"
+
+
+    driver.get(area_url)
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    station_list = soup.find(name='station')
+    print(type(station_list))
+ 
+
+    if resp.status_code != 200:
+        print("incorrect code entered")
+        return
+    
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    print(soup)
+    station_list = soup.find({'name': 'station'})
+    print(type(station_list))
+    
+    driver.quit()
+    '''
+
+def is_valid_date(date):
+    try:
+        test_date = datetime.strptime(date, '%Y-%m-%d')
+    except TypeError as e:
+        print("Invalid date format or type. \nError: ", e)
+        return False
+    except ValueError as e:
+        print("Improper date input, likely out of range. \nError: ", e)
+        return False
+    except Exception as e:
+        print("you did something wrong and im not sure what. \nError: ", e)
+        return False
+    return True
 
 def get_daily_info(given_date="2024-04-01", sid="AVPthr 9"):
     data = {
@@ -45,6 +105,9 @@ def get_daily_info(given_date="2024-04-01", sid="AVPthr 9"):
     #pprint.pprint(weather_data)
     daily_data = {
         "date" : weather_data['data'][0][0],
+        "state" : weather_data['meta']['state'],
+        "stationId" : weather_data['meta']['sids'][0],
+        "area" : weather_data['meta']['name'],
         "maxt" : weather_data['data'][0][1],
         "mint" : weather_data['data'][0][2],
         "avgt" : weather_data['data'][0][3],
@@ -218,6 +281,30 @@ def get_info_range(start_date = "2024-03-01", end_date="2024-03-07", sid="AVPthr
         print(curr_data)
         current_date += timedelta(days=1)
 
+def prompt_info():
+    print("Welcome to Riley's Weather Daily info Automator")
+    print("For this you will need to enter your dates in the format (YYYY-MM-DD)")
+    print("You will also need your station ID for the area you need, Riley can show you how to get this")
+    print("The general idea is that you will go here: https://www.weather.gov/wrh/Climate")
+    print("Find your region and then the area that you need info from")
+    print("Open up your browser's network analyzer and have it start recording")
+    print("Select the daily almanac and query for any date")
+    print("inside of any of the StnData packets under the request section will be a value called 'sid'")
+    print("the value stored inside of sid will have your station's id, copy that and that will be your sid")
+
+    begin_date = input("Input your begin date")
+    if not is_valid_date(begin_date):
+        print(f'{begin_date} is not a valid date')
+        return
+
+    end_date = input("Input your final date")
+    if not is_valid_date(end_date):
+        print(f'{end_date} is not a valid date')
+        return
+    
 
 
-get_info_range("2024-04-01", "2024-04-08")
+    
+get_sid()
+#get_info_range("2024-04-01", "2024-04-08")
+#print(get_daily_info())
