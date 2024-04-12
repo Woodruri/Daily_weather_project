@@ -2,6 +2,7 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import json
+import csv
 import pprint
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -261,7 +262,8 @@ def get_info(given_date="2024-04-01", sid="AVPthr 9"):
     return full_info
 
 def get_info_range(start_date = "2024-03-01", end_date="2024-03-07", sid="AVPthr 9"):
-    
+
+    output_dict = []    
 
     try:
         current_date = datetime.strptime(start_date, '%Y-%m-%d')
@@ -276,10 +278,22 @@ def get_info_range(start_date = "2024-03-01", end_date="2024-03-07", sid="AVPthr
         print("you did something wrong and im not sure what. \nError: ", e)
         return
 
+    #this is naive, I could async or multiprocess to do it much faster, you'd jut have to sort by date afterwards
     while current_date <= final_date:
         curr_data = get_info(current_date.strftime('%Y-%m-%d'))
-        pprint.pprint(curr_data)
+        output_dict.append(curr_data)
         current_date += timedelta(days=1)
+    
+    # Writing to CSV
+    if output_dict:
+        keys = output_dict[0].keys()  # Getting the column names from the first item
+        with open('data.csv', 'w', newline='') as output_file:
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(output_dict)
+        print("Data written to data.csv")
+    else:
+        print("No data to write.")
 
 def prompt_info():
     print("Welcome to Riley's Weather Daily info Automator")
@@ -291,6 +305,7 @@ def prompt_info():
     print("Select the daily almanac and query for any date")
     print("inside of any of the StnData packets under the request section will be a value called 'sid'")
     print("the value stored inside of sid will have your station's id, copy that and that will be your sid")
+    print("AVPthr 9")
 
     begin_date = input("Input your begin date: ")
     if not is_valid_date(begin_date):
