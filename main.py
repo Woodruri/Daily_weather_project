@@ -278,7 +278,7 @@ def get_info_range(start_date = "2024-03-01", end_date="2024-03-07", sid="AVPthr
 
     while current_date <= final_date:
         curr_data = get_info(current_date.strftime('%Y-%m-%d'))
-        print(curr_data)
+        pprint.pprint(curr_data)
         current_date += timedelta(days=1)
 
 def prompt_info():
@@ -292,19 +292,22 @@ def prompt_info():
     print("inside of any of the StnData packets under the request section will be a value called 'sid'")
     print("the value stored inside of sid will have your station's id, copy that and that will be your sid")
 
-    begin_date = input("Input your begin date")
+    begin_date = input("Input your begin date: ")
     if not is_valid_date(begin_date):
         print(f'{begin_date} is not a valid date')
         return
 
-    end_date = input("Input your final date")
+    end_date = input("Input your final date: ")
     if not is_valid_date(end_date):
         print(f'{end_date} is not a valid date')
         return
     
+    sid = input("Enter your sid, please ensure that this is correct because I'm not doing error checking for it: ")
 
+    get_info_range(begin_date, end_date, sid)
 
-    
-get_sid()
-#get_info_range("2024-04-01", "2024-04-08")
-#print(get_daily_info())
+def main():
+    prompt_info()
+
+if __name__ == '__main__':
+    main()
