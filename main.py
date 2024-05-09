@@ -214,12 +214,12 @@ def get_normal_info(given_date="2024-04-01", sid="AVPthr 9"):
     weather_data = json.loads(resp.text)
     #pprint.pprint(weather_data)
     normal_info = {
-        "maxt" : weather_data['data'][0][0],
-        "mint" : weather_data['data'][0][1],
-        "avgt" : weather_data['data'][0][2],
-        "precip" : weather_data['data'][0][3],
-        "snow" : weather_data['data'][0][4]
-    }
+        "maxt" : weather_data['data'][0][1],
+        "mint" : weather_data['data'][0][2],
+        "avgt" : weather_data['data'][0][3],
+        "precip" : weather_data['data'][0][4],
+        "snow" : weather_data['data'][0][5]
+    } 
     return normal_info
 
 def get_info(given_date="2024-04-01", sid="AVPthr 9"):
@@ -294,6 +294,31 @@ def get_info_range(start_date = "2024-03-01", end_date="2024-03-07", sid="AVPthr
         print("Data written to data.csv")
     else:
         print("No data to write.")
+    get_variance(output_dict)
+
+def get_variance(data):
+    temp_trend = 0
+    precip_trend = 0
+
+    # for csv
+    if data:
+        keys = ['date', 'temp_var','temp_trend', 'precip_var', 'precip_trend']
+        with open('variance.csv', 'w', newline='') as output_file:
+            writer = csv.DictWriter(output_file, fieldnames=keys)
+            writer.writeheader()
+            for day in data:
+                var_temp = float(day['daily_avgt']) - float(day['normal_avgt'])
+                var_precip = float(day['daily_precip']) - float(day['normal_precip']) if day['daily_precip'] != 'T' else 0
+                temp_trend += var_temp
+                precip_trend += var_precip
+                date = day['date']
+                writer.writerow({'date': date, 'temp_var': var_temp,'temp_trend':temp_trend, 'precip_var': var_precip, 'precip_trend':precip_trend})
+        print("Data written to variance.csv")
+    else:
+        print("No data to write.")
+    
+
+
 
 def prompt_info():
     print("Welcome to Riley's Weather Daily info Automator")
