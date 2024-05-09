@@ -312,7 +312,17 @@ def get_variance(data):
                 temp_trend += var_temp
                 precip_trend += var_precip
                 date = day['date']
-                writer.writerow({'date': date, 'temp_var': var_temp,'temp_trend':temp_trend, 'precip_var': var_precip, 'precip_trend':precip_trend})
+
+                # Round the values to 1 decimal place
+                rounded_var_temp = round(var_temp, 1)
+                rounded_temp_trend = round(temp_trend, 1)
+                rounded_var_precip = round(var_precip, 1)
+                rounded_precip_trend = round(precip_trend, 1)
+                writer.writerow({'date': date, 
+                                 'temp_var': rounded_var_temp,
+                                 'temp_trend':rounded_temp_trend, 
+                                 'precip_var': rounded_var_precip, 
+                                 'precip_trend':rounded_precip_trend})
         print("Data written to variance.csv")
     else:
         print("No data to write.")
